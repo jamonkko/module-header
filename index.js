@@ -11,7 +11,8 @@ const renderHeader = function (pkg) {
  * @license
  * ${pkg.name} v${pkg.version} ${pkg.homepage ? '(' + pkg.homepage + ')' : ''}
  * Copyright ${(new Date()).getFullYear()} ${pkg.author ? (typeof pkg.author === 'string' ? pkg.author : (pkg.author.name || '')) : ''}${pkg.author && pkg.author.url ? ' (' + pkg.author.url + ')' : ''}
-${pkg.license ? ' * Licensed under ' + pkg.license + `\n */` : ` */`}`);
+${pkg.license ? ' * Licensed under ' + pkg.license + `\n */` : ` */`}
+`);
 }
 
 const write = function(file, pkg, customHeader, cb) {
