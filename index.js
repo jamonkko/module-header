@@ -5,24 +5,30 @@ const vfs = require('vinyl-fs');
 const pkgUp = require('pkg-up');
 const Promise = require('pinkie-promise');
 
-const write = function(file, pkg, customTemplate, cb) {
-  file.contents = new Buffer((typeof customTemplate === 'string' ? customTemplate :
+const renderHeader = function (pkg) {
+  return (
 `/*!
  * @license
  * ${pkg.name} v${pkg.version} ${pkg.homepage ? '(' + pkg.homepage + ')' : ''}
  * Copyright ${(new Date()).getFullYear()} ${pkg.author ? (typeof pkg.author === 'string' ? pkg.author : (pkg.author.name || '')) : ''}${pkg.author && pkg.author.url ? ' (' + pkg.author.url + ')' : ''}
-${pkg.license ? ' * Licensed under ' + pkg.license + `\n */` : ` */`}
-`) + file.contents);
+${pkg.license ? ' * Licensed under ' + pkg.license + `\n */` : ` */`}`);
+}
+
+const write = function(file, pkg, customHeader, cb) {
+  const header = (typeof customHeader === 'string') ? customHeader : renderHeader(pkg);
+  if (file.contents.indexOf(header) === -1) {
+    file.contents = new Buffer(header + file.contents);
+  }
   cb(null, file);
 };
 
-module.exports = (globs, pkg, customTemplate) => {
+module.exports = (globs, pkg, customHeader) => {
   return new Promise((resolve, reject) => {
     vfs.src(globs, {base: './'})
       .on('error', (err) => reject(err))
       .pipe(map((file, cb) => {
         if (pkg) {
-          write(file, pkg, customTemplate, cb);
+          write(file, pkg, customHeader, cb);
           return;
         }
 
@@ -42,7 +48,7 @@ module.exports = (globs, pkg, customTemplate) => {
                 return;
               }
 
-              write(file, pkg, customTemplate, cb);
+              write(file, pkg, customHeader, cb);
             });
           })
           .catch(reject);
