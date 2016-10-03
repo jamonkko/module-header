@@ -22,3 +22,11 @@ test('should append a header', async t => {
   let contents = await fs.readFileSync(TEMP_FILE);
   t.true(contents.indexOf('test') > 0);
 });
+
+test('should append a header only once', async t => {
+  await header(TEMP_FILE, {'name': 'test'});
+  await header(TEMP_FILE, {'name': 'test'});
+
+  let contents = await fs.readFileSync(TEMP_FILE);
+  t.true(contents.indexOf('test') === contents.lastIndexOf('test') );
+});
