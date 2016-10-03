@@ -15,10 +15,18 @@ ${pkg.license ? ' * Licensed under ' + pkg.license + `\n */` : ` */`}
 `);
 }
 
+const withoutExistingHeader = function (contents, header) {
+  const start = header.substring(0, header.indexOf('@license') + '@license'.length);
+  const end = '*/\n';
+  return contents.indexOf(start) !== 0 ? contents : Buffer.from(contents).slice(contents.indexOf(end) + end.length);
+}
+
 const write = function(file, pkg, customHeader, cb) {
-  const header = (typeof customHeader === 'string') ? customHeader : renderHeader(pkg);
+  const useCustomHeader = (typeof customHeader === 'string');
+  const header = useCustomHeader ? customHeader : renderHeader(pkg);
   if (file.contents.indexOf(header) === -1) {
-    file.contents = new Buffer(header + file.contents);
+    const contents = useCustomHeader ? file.contents : withoutExistingHeader(file.contents, header);
+    file.contents = new Buffer(header + contents);
   }
   cb(null, file);
 };
